@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request
-from backend.chatBackend.configuration import conn, cursor, token_required
+from configuration import conn, cursor, token_required
 
 messages_blueprint = Blueprint('messages', __name__)
 

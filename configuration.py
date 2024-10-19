@@ -6,8 +6,10 @@ import datetime
 from flask import request, jsonify
 from functools import wraps
 import requests
+from dotenv import load_dotenv
 import google.generativeai as genai
 
+load_dotenv()
 host = os.getenv('host')
 dbname = os.getenv('dbname')
 user = os.getenv('user')
