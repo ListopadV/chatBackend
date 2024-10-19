@@ -15,6 +15,7 @@ app.register_blueprint(chat_blueprint, url_prefix='/chats')
 app.register_blueprint(messages_blueprint, url_prefix='/messages')
 app.register_blueprint(bots_blueprint, url_prefix='/bots')
 
+CORS(app, resources={r"/*": {"origins": "https://chat-frontend-gjwpecur9-listopadiiiiks-projects.vercel.app"}})
 
 @app.errorhandler(OperationalError)
 def handle_db_connection_error(error):
@@ -30,8 +31,6 @@ def handle_db_integrity_error(error):
 def handle_generic_error(error):
     return jsonify({"error": "An unexpected error occurred", "details": str(error)}), 500
 
-
-CORS(app, origins=['https://chat-frontend-git-main-listopadiiiiks-projects.vercel.app/'])
 
 if __name__ == "__main__":
     app.run(debug=True)
