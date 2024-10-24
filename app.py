@@ -15,7 +15,7 @@ app.register_blueprint(chat_blueprint, url_prefix='/chats')
 app.register_blueprint(messages_blueprint, url_prefix='/messages')
 app.register_blueprint(bots_blueprint, url_prefix='/bots')
 
-allowedOrigins = ['']
+allowedOrigins = ['https://chat-frontend-vlo.vercel.app']
 CORS(app, resources={r"/*": {
     "origins": allowedOrigins,
     "methods": ['GET', 'POST', 'DELETE', 'PUT'],
