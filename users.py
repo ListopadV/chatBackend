@@ -53,7 +53,13 @@ def registration():
 def login():
     try:
         if request.method == 'OPTIONS':
-            return '', 204
+            response = jsonify({'status': 'ok'})
+            response.headers['Access-Control-Allow-Origin'] = 'https://chat-frontend-vlo.vercel.app'
+            response.headers['Access-Control-Allow-Credentials'] = 'true'
+            response.headers['Access-Control-Allow-Methods'] = 'POST, GET, OPTIONS, PUT, DELETE'
+            response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
+            return response, 204
+
         data = request.json
         email = data.get('email')
         password = data.get('password')
@@ -87,8 +93,15 @@ def login():
 @users_blueprint.route('/fetch', methods=['GET', 'OPTIONS'])
 def fetch():
     try:
+
         if request.method == 'OPTIONS':
-            return '', 204
+            response = jsonify({'status': 'ok'})
+            response.headers['Access-Control-Allow-Origin'] = 'https://chat-frontend-vlo.vercel.app'
+            response.headers['Access-Control-Allow-Credentials'] = 'true'
+            response.headers['Access-Control-Allow-Methods'] = 'POST, GET, OPTIONS, PUT, DELETE'
+            response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
+            return response, 204
+
         token = request.headers.get('Authorization')
         if token is None:
             return jsonify({
@@ -125,7 +138,14 @@ def fetch():
 @users_blueprint.route('/callback', methods=['POST', 'OPTIONS'])
 def callback():
     if request.method == 'OPTIONS':
-        return '', 204
+        # Handle preflight OPTIONS request for CORS
+        response = jsonify({'status': 'ok'})
+        response.headers['Access-Control-Allow-Origin'] = 'https://chat-frontend-vlo.vercel.app'
+        response.headers['Access-Control-Allow-Credentials'] = 'true'
+        response.headers['Access-Control-Allow-Methods'] = 'POST, GET, OPTIONS, PUT, DELETE'
+        response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
+        return response, 204
+
     code = request.args.get('code')
     token_response = requests.post('https://github.com/login/oauth/access_token', data={
         'client_id': GITHUB_CLIENT_ID,

@@ -10,11 +10,6 @@ import os
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
 
-app.register_blueprint(users_blueprint, url_prefix='/users')
-app.register_blueprint(chat_blueprint, url_prefix='/chats')
-app.register_blueprint(messages_blueprint, url_prefix='/messages')
-app.register_blueprint(bots_blueprint, url_prefix='/bots')
-
 allowedOrigins = ['https://chat-frontend-vlo.vercel.app']
 CORS(app, resources={r"/*": {
     "origins": allowedOrigins,
@@ -22,6 +17,13 @@ CORS(app, resources={r"/*": {
     "allow_headers": ['Content-Type', 'Authorization', 'X-name', 'X-chat-id', 'X-bot-id'],
     "supports_credentials": True
 }})
+
+
+app.register_blueprint(users_blueprint, url_prefix='/users')
+app.register_blueprint(chat_blueprint, url_prefix='/chats')
+app.register_blueprint(messages_blueprint, url_prefix='/messages')
+app.register_blueprint(bots_blueprint, url_prefix='/bots')
+
 
 @app.errorhandler(OperationalError)
 def handle_db_connection_error(error):
