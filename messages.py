@@ -4,10 +4,12 @@ from configuration import conn, cursor, token_required
 messages_blueprint = Blueprint('messages', __name__)
 
 
-@messages_blueprint.route('/fetch', methods=['GET'])
+@messages_blueprint.route('/fetch', methods=['GET', 'OPTIONS'])
 @token_required
 def get_messages(user_id):
     try:
+        if request.method == 'OPTIONS':
+            return '', 204
         chat_id = request.headers.get('X-chat-id')
         bot_id = request.headers.get('X-bot-id')
 
@@ -51,9 +53,12 @@ def get_messages(user_id):
             for message in messages if message[2] in ['bot', 'user']
         ]
 
-        return jsonify({
+        response = jsonify({
             "messages": message_objects
-        }), 200
+        })
+        response.headers['Access-Control-Allow-Origin'] = 'https://chat-frontend-vlo.vercel.app'
+        response.headers['Access-Control-Allow-Credentials'] = 'true'
+        return response, 200
 
     except Exception as e:
         conn.rollback()

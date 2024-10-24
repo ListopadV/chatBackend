@@ -101,7 +101,7 @@ def ask_model(user_id):
         cursor.execute("""INSERT INTO chat_message VALUES (%s, %s)""", (b_gen, chat_id))
         conn.commit()
 
-        return jsonify({
+        response = jsonify({
             "user_message": {
                 "message_id": u_gen,
                 "message_order": message_order,
@@ -116,7 +116,10 @@ def ask_model(user_id):
                 "text": response,
                 "created_at": created_at_bot,
             }
-        }), status_code
+        })
+        response.headers['Access-Control-Allow-Origin'] = 'https://chat-frontend-vlo.vercel.app'
+        response.headers['Access-Control-Allow-Credentials'] = 'true'
+        return response, status_code
 
     except Exception as e:
         conn.rollback()
@@ -144,13 +147,16 @@ def create_chat(user_id):
             (bot_id,)
         )
         bot = cursor.fetchone()
-        return jsonify({
+        response = jsonify({
             "chat_id": generated,
             "chat_name": bot[0],
             "bot_avatar": bot[1],
             "bot_name": bot[2],
             "created_at": created_at[0]
-        }), 200
+        })
+        response.headers['Access-Control-Allow-Origin'] = 'https://chat-frontend-vlo.vercel.app'
+        response.headers['Access-Control-Allow-Credentials'] = 'true'
+        return response, 200
 
     except Exception as e:
         conn.rollback()
@@ -181,7 +187,10 @@ def fetch_chats(user_id):
             }
             for chat in user_chats
         ]
-        return jsonify(user_chats_objects), 200
+        response = jsonify(user_chats_objects)
+        response.headers['Access-Control-Allow-Origin'] = 'https://chat-frontend-vlo.vercel.app'
+        response.headers['Access-Control-Allow-Credentials'] = 'true'
+        return response, 200
 
     except Exception as e:
         conn.rollback()
@@ -224,7 +233,10 @@ def select_chat(user_id, chatId):
             "user_avatar": "pohuy 2",
             "bot_name": ch[2]
             }
-        return jsonify(data), 200
+        response = jsonify(data)
+        response.headers['Access-Control-Allow-Origin'] = 'https://chat-frontend-vlo.vercel.app'
+        response.headers['Access-Control-Allow-Credentials'] = 'true'
+        return response, 200
 
     except Exception as e:
         conn.rollback()
@@ -244,7 +256,9 @@ def delete_chat(user_id, chatId):
         cursor.execute("""DELETE FROM message WHERE message_id = %s""", (message_id, ))
     cursor.execute("""DELETE FROM chat WHERE chat_id = %s""", (chatId,))
 
-    return jsonify({
+    response = jsonify({
         "message": "Chat was deleted",
-    }), 200
-
+    })
+    response.headers['Access-Control-Allow-Origin'] = 'https://chat-frontend-vlo.vercel.app'
+    response.headers['Access-Control-Allow-Credentials'] = 'true'
+    return response, 200

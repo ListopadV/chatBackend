@@ -7,9 +7,11 @@ import requests
 users_blueprint = Blueprint('users', __name__)
 
 
-@users_blueprint.route('/registration', methods=['POST'])
+@users_blueprint.route('/registration', methods=['POST', 'OPTIONS'])
 def registration():
     try:
+        if request.method == 'OPTIONS':
+            return '', 204
         data = request.json
         first_name = data.get('first_name')
         last_name = data.get('last_name')
@@ -27,7 +29,10 @@ def registration():
         )
         conn.commit()
 
-        return jsonify({"message": "User was successfully registered", "access_token": create_jwt_token(generated)}), 200
+        response = jsonify({"message": "User was successfully registered", "access_token": create_jwt_token(generated)})
+        response.headers['Access-Control-Allow-Origin'] = 'https://chat-frontend-vlo.vercel.app'
+        response.headers['Access-Control-Allow-Credentials'] = 'true'
+        return response, 200
 
     except Exception as e:
         conn.rollback()
@@ -38,9 +43,11 @@ def registration():
         }), 500
 
 
-@users_blueprint.route('/login', methods=['POST'])
+@users_blueprint.route('/login', methods=['POST', 'OPTIONS'])
 def login():
     try:
+        if request.method == 'OPTIONS':
+            return '', 204
         data = request.json
         email = data.get('email')
         password = data.get('password')
@@ -56,6 +63,9 @@ def login():
             return jsonify({"message": "Wrong password or email"}), 400
 
         token = create_jwt_token(user[1])
+        response = jsonify({"message": "User logged in successfully", "access_token": token})
+        response.headers['Access-Control-Allow-Origin'] = 'https://chat-frontend-vlo.vercel.app'
+        response.headers['Access-Control-Allow-Credentials'] = 'true'
         return jsonify({"message": "User logged in successfully", "access_token": token}), 200
 
     except Exception as e:
@@ -68,9 +78,11 @@ def login():
         }), 500
 
 
-@users_blueprint.route('/fetch', methods=['GET'])
+@users_blueprint.route('/fetch', methods=['GET', 'OPTIONS'])
 def fetch():
     try:
+        if request.method == 'OPTIONS':
+            return '', 204
         token = request.headers.get('Authorization')
         if token is None:
             return jsonify({
@@ -83,11 +95,16 @@ def fetch():
             return jsonify({
                 "error": "User was not found"
             }), 404
-        return jsonify({
+
+        response = jsonify({
             "first_name": user[0],
             "last_name": user[1],
             "email": user[2]
-        }), 200
+        })
+        response.headers['Access-Control-Allow-Origin'] = 'https://chat-frontend-vlo.vercel.app'
+        response.headers['Access-Control-Allow-Credentials'] = 'true'
+
+        return response, 200
 
     except Exception as e:
         conn.rollback()
@@ -99,8 +116,10 @@ def fetch():
         }), 500
 
 
-@users_blueprint.route('/callback', methods=['POST'])
+@users_blueprint.route('/callback', methods=['POST', 'OPTIONS'])
 def callback():
+    if request.method == 'OPTIONS':
+        return '', 204
     code = request.args.get('code')
     token_response = requests.post('https://github.com/login/oauth/access_token', data={
         'client_id': GITHUB_CLIENT_ID,

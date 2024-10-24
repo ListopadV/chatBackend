@@ -19,12 +19,15 @@ def create_bot():
         cursor.execute("INSERT INTO bot VALUES (%s, %s, %s, %s, %s, now(), now())", (generated, name, model, avatar, description))
         conn.commit()
 
-        return jsonify({
+        response = jsonify({
             "bot_id": generated,
             "name": name,
             "model": model,
             "bot_avatar": avatar
-        }), 200
+        })
+        response.headers['Access-Control-Allow-Origin'] = 'https://chat-frontend-vlo.vercel.app'
+        response.headers['Access-Control-Allow-Credentials'] = 'true'
+        return response, 200
 
     except Exception as e:
         conn.rollback()
@@ -58,8 +61,10 @@ def get_bots(user_id):
                 "created_at": bot[5],
                 "updated_at": bot[6],
             })
-
-        return jsonify({"bots": info_objects}), 200
+        response = jsonify({"bots": info_objects})
+        response.headers['Access-Control-Allow-Origin'] = 'https://chat-frontend-vlo.vercel.app'
+        response.headers['Access-Control-Allow-Credentials'] = 'true'
+        return response, 200
 
     except Exception as e:
         conn.rollback()
