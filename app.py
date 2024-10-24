@@ -15,7 +15,12 @@ app.register_blueprint(chat_blueprint, url_prefix='/chats')
 app.register_blueprint(messages_blueprint, url_prefix='/messages')
 app.register_blueprint(bots_blueprint, url_prefix='/bots')
 
-CORS(app, resources={r"/*": {"origins": "https://chat-frontend-gjwpecur9-listopadiiiiks-projects.vercel.app"}})
+allowedOrigins = ['https://chat-frontend-gjwpecur9-listopadiiiiks-projects.vercel.app']
+CORS(app, resources={r"/*": {
+    "origins": allowedOrigins,
+    "methods": ['GET', 'POST', 'DELETE', 'PUT'],
+    "credentials": True
+}})
 
 @app.errorhandler(OperationalError)
 def handle_db_connection_error(error):
