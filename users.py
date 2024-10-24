@@ -11,7 +11,13 @@ users_blueprint = Blueprint('users', __name__)
 def registration():
     try:
         if request.method == 'OPTIONS':
-            return '', 204
+            response = jsonify({'status': 'ok'})
+            response.headers['Access-Control-Allow-Origin'] = 'https://chat-frontend-vlo.vercel.app'
+            response.headers['Access-Control-Allow-Credentials'] = 'true'
+            response.headers['Access-Control-Allow-Methods'] = 'POST, GET, OPTIONS, PUT, DELETE'
+            response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
+            return response, 204
+
         data = request.json
         first_name = data.get('first_name')
         last_name = data.get('last_name')
