@@ -18,8 +18,9 @@ app.register_blueprint(bots_blueprint, url_prefix='/bots')
 allowedOrigins = ['https://chat-frontend-vlo.vercel.app']
 CORS(app, resources={r"/*": {
     "origins": allowedOrigins,
-    "methods": ['GET', 'POST', 'DELETE', 'PUT'],
-    "credentials": True
+    "methods": ['GET', 'POST', 'DELETE', 'PUT', 'OPTIONS'],
+    "allow_headers": ['Content-Type', 'Authorization', 'X-name', 'X-chat-id', 'X-bot-id'],
+    "supports_credentials": True
 }})
 
 @app.errorhandler(OperationalError)
