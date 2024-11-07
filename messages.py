@@ -4,7 +4,7 @@ from configuration import conn, cursor, token_required
 messages_blueprint = Blueprint('messages', __name__)
 
 
-@messages_blueprint.route('/fetch', methods=['GET', 'OPTIONS'])
+@messages_blueprint.route('/fetch', methods=['GET'])
 @token_required
 def get_messages(user_id):
     try:
@@ -34,8 +34,6 @@ def get_messages(user_id):
         """, (bot_id, chat_id, user_id))
 
         messages = cursor.fetchall()
-        # cursor.execute("SELECT user_avatar FROM user WHERE user_id = %s", (user_id,))
-        # user_avatar = cursor.fetchone()
 
         user_avatar = "no ava"
         cursor.execute("SELECT bot_avatar FROM bot WHERE bot_id = %s", (bot_id, ))
@@ -56,8 +54,6 @@ def get_messages(user_id):
         response = jsonify({
             "messages": message_objects
         })
-        response.headers['Access-Control-Allow-Origin'] = 'https://chat-frontend-vlo.vercel.app'
-        response.headers['Access-Control-Allow-Credentials'] = 'true'
         return response, 200
 
     except Exception as e:

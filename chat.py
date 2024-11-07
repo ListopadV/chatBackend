@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request
-from configuration import conn, cursor, token_required, ask_chatgpt, ask_wit, ask_bard
+from configuration import conn, cursor, token_required, ask_wit, ask_bard
 import uuid
 
 chat_blueprint = Blueprint('chats', __name__)
@@ -11,15 +11,15 @@ def choose_model(name, text):
     top_p = request.json.get('top_p')
     max_tokens = request.json.get('max_tokens')
 
-    if name == 'ChatGPT':
+    # if name == 'ChatGpt':
+    #
+    #     if text is None:
+    #         return "Prompt is missing", 400
+    #
+    #     response, status_code = ask_gptj(text, temperature, top_p, max_tokens)
+    #     return response, status_code
 
-        if text is None:
-            return "Prompt is missing", 400
-
-        response, status_code = ask_chatgpt(text, temperature, top_p, max_tokens)
-        return response, status_code
-
-    elif name == 'Wit':
+    if name == 'Wit':
 
         if text is None:
             return "Prompt is missing", 400
@@ -117,8 +117,6 @@ def ask_model(user_id):
                 "created_at": created_at_bot,
             }
         })
-        response.headers['Access-Control-Allow-Origin'] = 'https://chat-frontend-vlo.vercel.app'
-        response.headers['Access-Control-Allow-Credentials'] = 'true'
         return response, status_code
 
     except Exception as e:
@@ -154,8 +152,6 @@ def create_chat(user_id):
             "bot_name": bot[2],
             "created_at": created_at[0]
         })
-        response.headers['Access-Control-Allow-Origin'] = 'https://chat-frontend-vlo.vercel.app'
-        response.headers['Access-Control-Allow-Credentials'] = 'true'
         return response, 200
 
     except Exception as e:
@@ -188,8 +184,6 @@ def fetch_chats(user_id):
             for chat in user_chats
         ]
         response = jsonify(user_chats_objects)
-        response.headers['Access-Control-Allow-Origin'] = 'https://chat-frontend-vlo.vercel.app'
-        response.headers['Access-Control-Allow-Credentials'] = 'true'
         return response, 200
 
     except Exception as e:
@@ -234,8 +228,6 @@ def select_chat(user_id, chatId):
             "bot_name": ch[2]
             }
         response = jsonify(data)
-        response.headers['Access-Control-Allow-Origin'] = 'https://chat-frontend-vlo.vercel.app'
-        response.headers['Access-Control-Allow-Credentials'] = 'true'
         return response, 200
 
     except Exception as e:
@@ -259,6 +251,4 @@ def delete_chat(user_id, chatId):
     response = jsonify({
         "message": "Chat was deleted",
     })
-    response.headers['Access-Control-Allow-Origin'] = 'https://chat-frontend-vlo.vercel.app'
-    response.headers['Access-Control-Allow-Credentials'] = 'true'
     return response, 200

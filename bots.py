@@ -25,8 +25,6 @@ def create_bot():
             "model": model,
             "bot_avatar": avatar
         })
-        response.headers['Access-Control-Allow-Origin'] = 'https://chat-frontend-vlo.vercel.app'
-        response.headers['Access-Control-Allow-Credentials'] = 'true'
         return response, 200
 
     except Exception as e:
@@ -45,7 +43,6 @@ def get_bots(user_id):
             SELECT bot.bot_id, bot.name, bot.model, bot.bot_avatar, bot.description, bot.created_at, bot.updated_at FROM bot
         """)
         info = cursor.fetchall()
-        print(info)
 
         if len(info) == 0:
             return jsonify({"message": "No bots were found"}), 200
@@ -62,8 +59,6 @@ def get_bots(user_id):
                 "updated_at": bot[6],
             })
         response = jsonify({"bots": info_objects})
-        response.headers['Access-Control-Allow-Origin'] = 'https://chat-frontend-vlo.vercel.app'
-        response.headers['Access-Control-Allow-Credentials'] = 'true'
         return response, 200
 
     except Exception as e:

@@ -10,20 +10,7 @@ import os
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
 
-# allowedOrigins = ['https://chat-frontend-vlo.vercel.app']
-# CORS(app, resources={r"/*": {
-#     "origins": allowedOrigins,
-#     "methods": ['GET', 'POST', 'DELETE', 'PUT', 'OPTIONS'],
-#     "allow_headers": ['Content-Type', 'Authorization', 'X-name', 'X-chat-id', 'X-bot-id'],
-#     "supports_credentials": True
-# }})
-
-CORS(app, resources={r"/*": {
-    "origins": "*",
-    "methods": ['GET', 'POST', 'DELETE', 'PUT', 'OPTIONS'],
-    "allow_headers": ['Content-Type', 'Authorization', 'X-name', 'X-chat-id', 'X-bot-id'],
-    "supports_credentials": True
-}})
+CORS(app)
 
 app.register_blueprint(users_blueprint, url_prefix='/users')
 app.register_blueprint(chat_blueprint, url_prefix='/chats')

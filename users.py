@@ -7,17 +7,11 @@ import requests
 users_blueprint = Blueprint('users', __name__)
 
 
-@users_blueprint.route('/registration', methods=['POST', 'OPTIONS'])
+@users_blueprint.route('/registration', methods=['POST'])
 def registration():
     try:
-        if request.method == 'OPTIONS':
-            response = jsonify({'status': 'ok'})
-            response.headers['Access-Control-Allow-Origin'] = 'https://chat-frontend-vlo.vercel.app'
-            response.headers['Access-Control-Allow-Credentials'] = 'true'
-            response.headers['Access-Control-Allow-Methods'] = 'POST, GET, OPTIONS, PUT, DELETE'
-            response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
-            return response, 204
 
+        print(" here ")
         data = request.json
         first_name = data.get('first_name')
         last_name = data.get('last_name')
@@ -36,12 +30,11 @@ def registration():
         conn.commit()
 
         response = jsonify({"message": "User was successfully registered", "access_token": create_jwt_token(generated)})
-        response.headers['Access-Control-Allow-Origin'] = 'https://chat-frontend-vlo.vercel.app'
-        response.headers['Access-Control-Allow-Credentials'] = 'true'
         return response, 200
 
     except Exception as e:
         conn.rollback()
+        print("Error")
         print(str(e))
         return jsonify({
             "error": "An unexpected error occurred",
@@ -49,17 +42,9 @@ def registration():
         }), 500
 
 
-@users_blueprint.route('/login', methods=['POST', 'OPTIONS'])
+@users_blueprint.route('/login', methods=['POST'])
 def login():
     try:
-        if request.method == 'OPTIONS':
-            response = jsonify({'status': 'ok'})
-            response.headers['Access-Control-Allow-Origin'] = 'https://chat-frontend-vlo.vercel.app'
-            response.headers['Access-Control-Allow-Credentials'] = 'true'
-            response.headers['Access-Control-Allow-Methods'] = 'POST, GET, OPTIONS, PUT, DELETE'
-            response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
-            return response, 204
-
         data = request.json
         email = data.get('email')
         password = data.get('password')
@@ -75,9 +60,6 @@ def login():
             return jsonify({"message": "Wrong password or email"}), 400
 
         token = create_jwt_token(user[1])
-        response = jsonify({"message": "User logged in successfully", "access_token": token})
-        response.headers['Access-Control-Allow-Origin'] = 'https://chat-frontend-vlo.vercel.app'
-        response.headers['Access-Control-Allow-Credentials'] = 'true'
         return jsonify({"message": "User logged in successfully", "access_token": token}), 200
 
     except Exception as e:
@@ -90,17 +72,9 @@ def login():
         }), 500
 
 
-@users_blueprint.route('/fetch', methods=['GET', 'OPTIONS'])
+@users_blueprint.route('/fetch', methods=['GET'])
 def fetch():
     try:
-
-        if request.method == 'OPTIONS':
-            response = jsonify({'status': 'ok'})
-            response.headers['Access-Control-Allow-Origin'] = 'https://chat-frontend-vlo.vercel.app'
-            response.headers['Access-Control-Allow-Credentials'] = 'true'
-            response.headers['Access-Control-Allow-Methods'] = 'POST, GET, OPTIONS, PUT, DELETE'
-            response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
-            return response, 204
 
         token = request.headers.get('Authorization')
         if token is None:
@@ -120,8 +94,6 @@ def fetch():
             "last_name": user[1],
             "email": user[2]
         })
-        response.headers['Access-Control-Allow-Origin'] = 'https://chat-frontend-vlo.vercel.app'
-        response.headers['Access-Control-Allow-Credentials'] = 'true'
 
         return response, 200
 
@@ -135,15 +107,10 @@ def fetch():
         }), 500
 
 
-@users_blueprint.route('/callback', methods=['POST', 'OPTIONS'])
+@users_blueprint.route('/callback', methods=['POST'])
 def callback():
     if request.method == 'OPTIONS':
-        # Handle preflight OPTIONS request for CORS
         response = jsonify({'status': 'ok'})
-        response.headers['Access-Control-Allow-Origin'] = 'https://chat-frontend-vlo.vercel.app'
-        response.headers['Access-Control-Allow-Credentials'] = 'true'
-        response.headers['Access-Control-Allow-Methods'] = 'POST, GET, OPTIONS, PUT, DELETE'
-        response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
         return response, 204
 
     code = request.args.get('code')
