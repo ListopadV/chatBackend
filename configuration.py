@@ -30,7 +30,9 @@ gemini_api_key = os.getenv('gemini_api_key')
 gemini_api_url = os.getenv('gemini_api_url')
 gpt_key = os.getenv('gptkey')
 
-openai.api_key = gpt_key
+client = OpenAI(
+    api_key=gpt_key
+)
 
 logger = logging.getLogger(__name__)
 
@@ -50,7 +52,7 @@ cursor = conn.cursor()
 
 def ask_gpt(text, temperature, top_p, max_tokens):
     try:
-        completion = openai.ChatCompletion.create(
+        completion = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
                 {"role": "user", "content": text}
@@ -59,7 +61,7 @@ def ask_gpt(text, temperature, top_p, max_tokens):
             top_p=top_p,
             max_tokens=max_tokens
         )
-        response = completion.choices[0].message
+        response = completion.choices[0].message.content
         return response, 200
     except Exception as e:
         return str(e), 500
