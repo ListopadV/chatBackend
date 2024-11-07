@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request
-from configuration import conn, cursor, token_required, ask_wit, ask_bard
+from configuration import conn, cursor, token_required, ask_wit, ask_bard, ask_gpt
 import uuid
 
 chat_blueprint = Blueprint('chats', __name__)
@@ -25,6 +25,13 @@ def choose_model(name, text):
             return "Prompt is missing", 400
 
         response, status_code = ask_wit(text)
+        return response, status_code
+
+    elif name == 'ChatGPT':
+        if text is None:
+            return "Prompt is missing", 400
+
+        response, status_code = ask_gpt(text, temperature, top_p, max_tokens)
         return response, status_code
 
     elif name == 'Bard':

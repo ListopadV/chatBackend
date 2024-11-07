@@ -10,8 +10,6 @@ users_blueprint = Blueprint('users', __name__)
 @users_blueprint.route('/registration', methods=['POST'])
 def registration():
     try:
-
-        print(" here ")
         data = request.json
         first_name = data.get('first_name')
         last_name = data.get('last_name')
