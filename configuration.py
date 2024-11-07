@@ -1,3 +1,4 @@
+import openai
 import psycopg2
 import jwt
 import logging
@@ -10,8 +11,6 @@ import requests
 from dotenv import load_dotenv
 import google.generativeai as genai
 from openai import OpenAI
-
-client = OpenAI()
 
 load_dotenv()
 host = os.getenv('host')
@@ -31,6 +30,8 @@ gemini_api_key = os.getenv('gemini_api_key')
 gemini_api_url = os.getenv('gemini_api_url')
 gpt_key = os.getenv('gptkey')
 
+openai.api_key = gpt_key
+
 logger = logging.getLogger(__name__)
 
 try:
@@ -49,7 +50,7 @@ cursor = conn.cursor()
 
 def ask_gpt(text, temperature, top_p, max_tokens):
     try:
-        completion = client.chat.completions.create(
+        completion = openai.ChatCompletion.create(
             model="gpt-4o-mini",
             messages=[
                 {"role": "user", "content": text}
