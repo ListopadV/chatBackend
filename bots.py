@@ -35,12 +35,12 @@ def create_bot():
         }), 500
 
 
-@bots_blueprint.route('/motherfuckers', methods=['GET'])
+@bots_blueprint.route('/bots', methods=['GET'])
 @token_required
 def get_bots(user_id):
     try:
         cursor.execute("""
-            SELECT bot.bot_id, bot.name, bot.model, bot.bot_avatar, bot.description, bot.created_at, bot.updated_at FROM bot
+            SELECT bot_id, name, model, bot_avatar, description, created_at, updated_at FROM bot
         """)
         info = cursor.fetchall()
 

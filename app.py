@@ -12,11 +12,11 @@ app.secret_key = os.urandom(24)
 
 CORS(app, origins=['https://chat-frontend-vlo.vercel.app'])
 
-CORS(app, resources={
-    r"/*": {
-        "origins": "http://localhost:3000"
-    }
-})
+# CORS(app, resources={
+#     r"/*": {
+#         "origins": "http://localhost:3000"
+#     }
+# })
 
 
 app.register_blueprint(users_blueprint, url_prefix='/users')
@@ -41,5 +41,5 @@ def handle_generic_error(error):
 
 
 if __name__ == "__main__":
-    app.run(debug=True, host='0.0.0.0', port=8000)
-    # app.run(debug=True)
+    # app.run(debug=True, host='0.0.0.0', port=8000)
+    app.run(debug=True)

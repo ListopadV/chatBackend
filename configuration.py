@@ -1,4 +1,3 @@
-import openai
 import psycopg2
 import jwt
 import logging
@@ -13,34 +12,33 @@ import google.generativeai as genai
 from openai import OpenAI
 
 load_dotenv()
-host = os.getenv('host')
-dbname = os.getenv('dbname')
-user = os.getenv('user')
-password = os.getenv('password')
-sslmode = "require"
-secret_key = os.getenv('secret_key')
-api_key = os.getenv('api_key')
-endpoint = os.getenv('endpoint')
+host = os.getenv('POSTGRES_HOST')
+dbname = os.getenv('POSTGRES_DB')
+user = os.getenv('POSTGRES_USER')
+password = os.getenv('POSTGRES_PASSWORD')
+secret_key = os.getenv('SECRET_KEY')
 GITHUB_CLIENT_ID = os.getenv('GITHUB_CLIENT_ID')
 GITHUB_CLIENT_SECRET = os.getenv('GITHUB_CLIENT_SECRET')
 GITHUB_REDIRECT_URI = os.getenv('GITHUB_REDIRECT_URI')
-wit_api_key = os.getenv('wit_api_key')
-wit_endpoint = os.getenv('wit_endpoint')
-gemini_api_key = os.getenv('gemini_api_key')
-gemini_api_url = os.getenv('gemini_api_url')
-gpt_key = os.getenv('gptkey')
+gemini_api_key = os.getenv('GEMINI_API_KEY')
+gemini_api_url = os.getenv('GEMINI_API_URL')
+api_key = os.getenv('OPENAI_API_KEY')
 
-client = OpenAI(
-    api_key=gpt_key
-)
+
+if api_key is None:
+    print("Error: OPENAI_API_KEY environment variable not set")
+else:
+    print("API key retrieved successfully")
+
+client = OpenAI(api_key=api_key)
 
 logger = logging.getLogger(__name__)
 
 try:
     conn = psycopg2.connect(
-        host="ep-red-bird-a2w4s2p7-pooler.eu-central-1.aws.neon.tech",
-        user="project_owner", password="CnyOFBI1GN7v",
-        database="project", port="5432",
+        host=host,
+        user=user, password=password,
+        database=dbname, port="5432",
         sslmode='require')
 except psycopg2.Error as e:
     logger.error('Could not establish connection with Postgre database')
@@ -65,24 +63,6 @@ def ask_gpt(text, temperature, top_p, max_tokens):
         return response, 200
     except Exception as e:
         return str(e), 500
-
-
-def ask_wit(text):
-    final_endpoint = wit_endpoint
-
-    headers = {
-        'Authorization': 'Bearer '+wit_api_key
-    }
-    params = {
-        'q': text
-    }
-    try:
-        response = requests.get(final_endpoint, headers=headers, params=params)
-        response.raise_for_status()
-
-    except requests.RequestException as e:
-        raise SystemExit(f"Failed to make the request. Error: {e}")
-    return response.json()
 
 
 def ask_bard(text, temperature, top_p, max_tokens):

@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request
-from configuration import conn, cursor, token_required, ask_wit, ask_bard, ask_gpt
+from configuration import conn, cursor, token_required, ask_bard, ask_gpt
 import uuid
 
 chat_blueprint = Blueprint('chats', __name__)
@@ -11,23 +11,7 @@ def choose_model(name, text):
     top_p = request.json.get('top_p')
     max_tokens = request.json.get('max_tokens')
 
-    # if name == 'ChatGpt':
-    #
-    #     if text is None:
-    #         return "Prompt is missing", 400
-    #
-    #     response, status_code = ask_gptj(text, temperature, top_p, max_tokens)
-    #     return response, status_code
-
-    if name == 'Wit':
-
-        if text is None:
-            return "Prompt is missing", 400
-
-        response, status_code = ask_wit(text)
-        return response, status_code
-
-    elif name == 'ChatGPT':
+    if name == 'ChatGPT':
         if text is None:
             return "Prompt is missing", 400
 
