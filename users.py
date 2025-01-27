@@ -1,15 +1,25 @@
 from flask import Blueprint, request, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
-from configuration import conn, cursor, decode_jwt_token, create_jwt_token, GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET
+from configuration import conn, decode_jwt_token, create_jwt_token, GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET, connection_pool
 import uuid
 import requests
 
 users_blueprint = Blueprint('users', __name__)
 
+# Function to get a database connection from the pool
+def get_db_connection():
+    return connection_pool.getconn()
+
+# Function to release the connection back to the pool
+def release_db_connection(connection):
+    connection_pool.putconn(connection)
+
 
 @users_blueprint.route('/registration', methods=['POST'])
 def registration():
     try:
+        conn = get_db_connection()  # Get a connection from the pool
+        cursor = conn.cursor()
         data = request.json
         first_name = data.get('first_name')
         last_name = data.get('last_name')
@@ -27,13 +37,16 @@ def registration():
         )
         conn.commit()
 
+        release_db_connection(conn)  # Release the connection back to the pool
+
         response = jsonify({"message": "User was successfully registered", "access_token": create_jwt_token(generated)})
         return response, 200
 
     except Exception as e:
-        conn.rollback()
-        print("Error")
-        print(str(e))
+        if conn:
+            conn.rollback()
+            release_db_connection(conn)  # Ensure connection is released in case of error
+        print("Error:", str(e))
         return jsonify({
             "error": "An unexpected error occurred",
             "details": str(e)
@@ -43,6 +56,8 @@ def registration():
 @users_blueprint.route('/login', methods=['POST'])
 def login():
     try:
+        conn = get_db_connection()  # Get a connection from the pool
+        cursor = conn.cursor()
         data = request.json
         email = data.get('email')
         password = data.get('password')
@@ -51,19 +66,24 @@ def login():
         user = cursor.fetchone()
 
         if user is None:
+            release_db_connection(conn)  # Release the connection if user is not found
             return jsonify({"message": "Wrong password or email"}), 400
 
         stored_password = user[0]
         if not check_password_hash(stored_password, password):
+            release_db_connection(conn)  # Release the connection after check
             return jsonify({"message": "Wrong password or email"}), 400
 
         token = create_jwt_token(user[1])
+        release_db_connection(conn)  # Release the connection after use
+
         return jsonify({"message": "User logged in successfully", "access_token": token}), 200
 
     except Exception as e:
-        conn.rollback()
+        if conn:
+            conn.rollback()
+            release_db_connection(conn)  # Release the connection in case of error
         print(str(e))
-
         return jsonify({
             "error": "An unexpected error occurred",
             "details": str(e)
@@ -73,19 +93,19 @@ def login():
 @users_blueprint.route('/fetch', methods=['GET'])
 def fetch():
     try:
-
+        conn = get_db_connection()  # Get a connection from the pool
+        cursor = conn.cursor()
         token = request.headers.get('Authorization')
         if token is None:
-            return jsonify({
-                "message": "Unauthorized"
-            }), 401
+            release_db_connection(conn)  # Release connection if no token
+            return jsonify({"message": "Unauthorized"}), 401
+
         user_id = decode_jwt_token(token)
         cursor.execute("""SELECT "user".first_name, "user".last_name, "user".email FROM "user" WHERE user_id = %s""", (user_id,))
         user = cursor.fetchone()
         if user is None:
-            return jsonify({
-                "error": "User was not found"
-            }), 404
+            release_db_connection(conn)  # Release connection if user not found
+            return jsonify({"error": "User was not found"}), 404
 
         response = jsonify({
             "first_name": user[0],
@@ -93,12 +113,15 @@ def fetch():
             "email": user[2]
         })
 
+        release_db_connection(conn)  # Release connection after use
+
         return response, 200
 
     except Exception as e:
-        conn.rollback()
+        if conn:
+            conn.rollback()
+            release_db_connection(conn)  # Ensure connection is released in case of error
         print(str(e))
-
         return jsonify({
             "error": "An unexpected error occurred",
             "details": str(e)

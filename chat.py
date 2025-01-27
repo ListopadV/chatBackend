@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request
-from configuration import conn, cursor, token_required, ask_bard, ask_gpt
+from configuration import  token_required, ask_bard, ask_gpt, connection_pool
 import uuid
 
 chat_blueprint = Blueprint('chats', __name__)
@@ -29,11 +29,12 @@ def choose_model(name, text):
     else:
         return "Invalid model name", 400
 
-
 @chat_blueprint.route('/ask', methods=['POST'])
 @token_required
 def ask_model(user_id):
+    conn = connection_pool.getconn()  # Get connection from the pool
     try:
+        cursor = conn.cursor()
         u_gen = str(uuid.uuid4())
         b_gen = str(uuid.uuid4())
         name = request.headers.get('X-name')
@@ -118,12 +119,16 @@ def ask_model(user_id):
             "details": str(e)
         }), 500
 
+    finally:
+        connection_pool.putconn(conn)
+
 
 @chat_blueprint.route('/create', methods=['POST'])
 @token_required
 def create_chat(user_id):
-
+    conn = connection_pool.getconn()
     try:
+        cursor = conn.cursor()
         generated = str(uuid.uuid4())
         name = request.json.get('name')
         bot_id = request.json.get('bot_id')
@@ -154,11 +159,16 @@ def create_chat(user_id):
             "details": str(e)
         }), 500
 
+    finally:
+        connection_pool.putconn(conn)  # Always return the connection to the pool
+
 
 @chat_blueprint.route('/user', methods=['GET'])
 @token_required
 def fetch_chats(user_id):
+    conn = connection_pool.getconn()  # Get connection from the pool
     try:
+        cursor = conn.cursor()
         cursor.execute("""SELECT c.chat_id, c.chat_name, c.created_at, b.bot_avatar, b.name, b.bot_id FROM """
                        """chat c JOIN bot b on c.bot_id = b.bot_id JOIN "user" u on u.user_id = c.user_id WHERE u.user_id = %s""", (user_id,))
         user_chats = cursor.fetchall()
@@ -185,12 +195,16 @@ def fetch_chats(user_id):
             "details": str(e)
         }), 500
 
+    finally:
+        connection_pool.putconn(conn)  # Always return the connection to the pool
+
 
 @chat_blueprint.route('/<chatId>', methods=['GET'])
 @token_required
 def select_chat(user_id, chatId):
+    conn = connection_pool.getconn()  # Get connection from the pool
     try:
-
+        cursor = conn.cursor()
         if chatId is None:
             return jsonify({
                 "message": "Chat was not found"
@@ -208,6 +222,7 @@ def select_chat(user_id, chatId):
             WHERE c.user_id = %s AND c.chat_id = %s
         """, (user_id, chatId))
 
+        conn.commit()
         ch = cursor.fetchone()
         data = {
             "chat_id": chatId,
@@ -228,18 +243,34 @@ def select_chat(user_id, chatId):
             "details": str(e)
         }), 500
 
+    finally:
+        connection_pool.putconn(conn)  # Always return the connection to the pool
+
 
 @chat_blueprint.route('/<chatId>/delete', methods=['DELETE'])
 @token_required
 def delete_chat(user_id, chatId):
+    conn = connection_pool.getconn()
+    try:
+        cursor = conn.cursor()
+        cursor.execute("""DELETE FROM chat_message WHERE chat_id = %s RETURNING message_id""", (chatId,))
+        messages_id = cursor.fetchall()
+        for message_id in messages_id:
+            cursor.execute("""DELETE FROM message WHERE message_id = %s""", (message_id, ))
+        cursor.execute("""DELETE FROM chat WHERE chat_id = %s""", (chatId,))
+        conn.commit()
+        response = jsonify({
+            "message": "Chat was deleted",
+        })
+        return response, 200
 
-    cursor.execute("""DELETE FROM chat_message WHERE chat_id = %s RETURNING message_id""", (chatId,))
-    messages_id = cursor.fetchall()
-    for message_id in messages_id:
-        cursor.execute("""DELETE FROM message WHERE message_id = %s""", (message_id, ))
-    cursor.execute("""DELETE FROM chat WHERE chat_id = %s""", (chatId,))
+    except Exception as e:
+        conn.rollback()
+        print(str(e))
+        return jsonify({
+            "error": "An unexpected error occurred",
+            "details": str(e)
+        }), 500
 
-    response = jsonify({
-        "message": "Chat was deleted",
-    })
-    return response, 200
+    finally:
+        connection_pool.putconn(conn)

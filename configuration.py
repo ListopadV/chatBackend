@@ -1,5 +1,5 @@
-import psycopg2
 import jwt
+from psycopg2 import pool
 import logging
 import os
 import sys
@@ -34,19 +34,17 @@ client = OpenAI(api_key=api_key)
 
 logger = logging.getLogger(__name__)
 
-try:
-    conn = psycopg2.connect(
-        host=host,
-        user=user, password=password,
-        database=dbname, port="5432",
-        sslmode='require')
-except psycopg2.Error as e:
-    logger.error('Could not establish connection with Postgre database')
-    logger.error(e)
-    sys.exit(0)
+connection_pool = pool.SimpleConnectionPool(
+    minconn=1,
+    maxconn=20,
+    user=user,
+    password=password,
+    host=host,
+    port=5432,
+    database=dbname
+)
 
-cursor = conn.cursor()
-
+conn = connection_pool.getconn()
 
 def ask_gpt(text, temperature, top_p, max_tokens):
     try:
@@ -60,7 +58,7 @@ def ask_gpt(text, temperature, top_p, max_tokens):
             max_tokens=max_tokens
         )
         response = completion.choices[0].message.content
-        return response, 200
+        return response, 200;
     except Exception as e:
         return str(e), 500
 
@@ -126,4 +124,3 @@ def token_required(f):
         user_id = decode_jwt_token(auth_render)
         return f(user_id, *args, **kwargs)
     return decorated
-

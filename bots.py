@@ -1,7 +1,7 @@
 from configuration import decode_jwt_token, token_required
 from flask import Blueprint, request, jsonify
 import uuid
-from configuration import cursor, conn
+from configuration import connection_pool
 
 bots_blueprint = Blueprint('bots', __name__)
 
@@ -11,12 +11,15 @@ bots_blueprint = Blueprint('bots', __name__)
 def create_bot():
 
     try:
+        conn = connection_pool.getconn()
+        cursor = conn.cursor()
         generated = str(uuid.uuid4())
         name = request.json.get('name')
         model = request.json.get('model')
         avatar = request.json.get('avatar')
         description = request.json.get('description')
-        cursor.execute("INSERT INTO bot VALUES (%s, %s, %s, %s, %s, now(), now())", (generated, name, model, avatar, description))
+        cursor.execute("INSERT INTO bot VALUES (%s, %s, %s, %s, %s, now(), now())",
+         (generated, name, model, avatar, description))
         conn.commit()
 
         response = jsonify({
@@ -25,6 +28,7 @@ def create_bot():
             "model": model,
             "bot_avatar": avatar
         })
+        connection_pool.putconn(conn)
         return response, 200
 
     except Exception as e:
@@ -34,11 +38,16 @@ def create_bot():
             "details": str(e)
         }), 500
 
+    finally:
+        connection_pool.putconn(conn)
+
 
 @bots_blueprint.route('/bots', methods=['GET'])
 @token_required
 def get_bots(user_id):
     try:
+        conn = connection_pool.getconn()
+        cursor = conn.cursor()
         cursor.execute("""
             SELECT bot_id, name, model, bot_avatar, description, created_at, updated_at FROM bot
         """)
@@ -58,6 +67,7 @@ def get_bots(user_id):
                 "created_at": bot[5],
                 "updated_at": bot[6],
             })
+
         response = jsonify({"bots": info_objects})
         return response, 200
 
@@ -67,3 +77,6 @@ def get_bots(user_id):
             "error": "An unexpected error occurred",
             "details": str(e)
         }), 500
+
+    finally:
+        connection_pool.putconn(conn)

@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request
-from configuration import conn, cursor, token_required
+from configuration import conn, token_required, connection_pool
 
 messages_blueprint = Blueprint('messages', __name__)
 
@@ -8,37 +8,43 @@ messages_blueprint = Blueprint('messages', __name__)
 @token_required
 def get_messages(user_id):
     try:
-        if request.method == 'OPTIONS':
-            return '', 204
+        conn = connection_pool.getconn()
+        cursor = conn.cursor()
+
         chat_id = request.headers.get('X-chat-id')
         bot_id = request.headers.get('X-bot-id')
 
-        if chat_id is None:
-            return jsonify({
-                "message": "Unselected chat exception"
-            })
+        if not chat_id:
+            return jsonify({"message": "Unselected chat exception"}), 400
 
-        if bot_id is None:
-            return jsonify({
-                "message": "Unselected bot exception"
-            })
+        if not bot_id:
+            return jsonify({"message": "Unselected bot exception"}), 400
 
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT m.message_id, m.message_order, m.sender_type, m.text, m.created_at 
             FROM message m 
             JOIN chat_message cm ON cm.message_id = m.message_id 
             JOIN chat c ON c.chat_id = cm.chat_id
             JOIN "user" u ON u.user_id = c.user_id 
             JOIN bot b ON b.bot_id = c.bot_id 
-            WHERE b.bot_id = %s AND c.chat_id = %s AND u.user_id = %s ORDER BY m.message_order asc
-        """, (bot_id, chat_id, user_id))
+            WHERE b.bot_id = %s AND c.chat_id = %s AND u.user_id = %s 
+            ORDER BY m.message_order ASC
+            """,
+            (bot_id, chat_id, user_id)
+        )
 
         messages = cursor.fetchall()
 
-        user_avatar = "no ava"
-        cursor.execute("SELECT bot_avatar FROM bot WHERE bot_id = %s", (bot_id, ))
+        # Fetch bot avatar
+        cursor.execute("SELECT bot_avatar FROM bot WHERE bot_id = %s", (bot_id,))
         bot_avatar = cursor.fetchone()
+        bot_avatar = bot_avatar[0] if bot_avatar else "no avatar"
 
+        # User avatar placeholder
+        user_avatar = "no ava"
+
+        # Prepare message objects
         message_objects = [
             {
                 "message_id": message[0],
@@ -51,14 +57,11 @@ def get_messages(user_id):
             for message in messages if message[2] in ['bot', 'user']
         ]
 
-        response = jsonify({
-            "messages": message_objects
-        })
+        response = jsonify({"messages": message_objects})
         return response, 200
 
     except Exception as e:
         conn.rollback()
-        return jsonify({
-            "error": "An unexpected error occurred",
-            "details": str(e)
-        }), 500
+        return jsonify({"error": "An unexpected error occurred", "details": str(e)}), 500
+    finally:
+        connection_pool.putconn(conn)

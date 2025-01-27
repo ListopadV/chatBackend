@@ -24,7 +24,6 @@ app.register_blueprint(chat_blueprint, url_prefix='/chats')
 app.register_blueprint(messages_blueprint, url_prefix='/messages')
 app.register_blueprint(bots_blueprint, url_prefix='/bots')
 
-
 @app.errorhandler(OperationalError)
 def handle_db_connection_error(error):
     return jsonify({"error": "Database connection failed", "details": str(error)}), 500
@@ -41,5 +40,5 @@ def handle_generic_error(error):
 
 
 if __name__ == "__main__":
-    app.run(debug=True, host='0.0.0.0', port=8000)
-    # app.run(debug=True)
+    # app.run(debug=True, host='0.0.0.0', port=8000)
+    app.run(debug=True)
