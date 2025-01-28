@@ -40,7 +40,7 @@ connection_pool = pool.SimpleConnectionPool(
     password=password,
     host=host,
     port=5432,
-    database=dbname
+    dbname=dbname
 )
 
 

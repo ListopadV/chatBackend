@@ -8,12 +8,17 @@ users_blueprint = Blueprint('users', __name__)
 
 
 def get_db_connection():
-    return connection_pool.getconn()
+    connection = connection_pool.getconn()
+    print("Connection acquired")
+    return connection
 
 
 def release_db_connection(connection):
     if connection:
-        connection_pool.putconn(connection)
+        try:
+            connection_pool.putconn(connection)
+        except Exception as e:
+            print(f"Error releasing connection: {str(e)}")
 
 
 @users_blueprint.route('/registration', methods=['POST'])
