@@ -10,14 +10,7 @@ import os
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
 
-CORS(app, origins=['https://chat-frontend-vlo.vercel.app'])
-
-CORS(app, resources={
-    r"/*": {
-        "origins": "http://localhost:3000"
-    }
-})
-
+CORS(app, origins=['https://chat-frontend-vlo.vercel.app', 'http://localhost:3000'])
 
 app.register_blueprint(users_blueprint, url_prefix='/users')
 app.register_blueprint(chat_blueprint, url_prefix='/chats')
