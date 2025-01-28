@@ -5,6 +5,15 @@ import uuid
 chat_blueprint = Blueprint('chats', __name__)
 
 
+def get_db_connection():
+    return connection_pool.getconn()
+
+
+def release_db_connection(connection):
+    if connection:
+        connection_pool.putconn(connection)
+
+
 def choose_model(name, text):
 
     temperature = request.json.get('temperature')
@@ -29,12 +38,13 @@ def choose_model(name, text):
     else:
         return "Invalid model name", 400
 
+
 @chat_blueprint.route('/ask', methods=['POST'])
 @token_required
 def ask_model(user_id):
-    conn = connection_pool.getconn()  # Get connection from the pool
+    connection = get_db_connection()
     try:
-        cursor = conn.cursor()
+        cursor = connection.cursor()
         u_gen = str(uuid.uuid4())
         b_gen = str(uuid.uuid4())
         name = request.headers.get('X-name')
@@ -79,7 +89,7 @@ def ask_model(user_id):
         user_timestamps = cursor.fetchone()
         created_at_user, updated_at_user = user_timestamps
         cursor.execute("""INSERT INTO chat_message VALUES (%s, %s)""", (u_gen, chat_id))
-        conn.commit()
+        connection.commit()
         cursor.execute(
             """
             INSERT INTO message
@@ -91,7 +101,7 @@ def ask_model(user_id):
         bot_timestamps = cursor.fetchone()
         created_at_bot, updated_at_bot = bot_timestamps
         cursor.execute("""INSERT INTO chat_message VALUES (%s, %s)""", (b_gen, chat_id))
-        conn.commit()
+        connection.commit()
 
         response = jsonify({
             "user_message": {
@@ -112,7 +122,7 @@ def ask_model(user_id):
         return response, status_code
 
     except Exception as e:
-        conn.rollback()
+        connection.rollback()
         print(str(e))
         return jsonify({
             "error": "An unexpected error occurred",
@@ -120,22 +130,22 @@ def ask_model(user_id):
         }), 500
 
     finally:
-        connection_pool.putconn(conn)
+        release_db_connection(connection)
 
 
 @chat_blueprint.route('/create', methods=['POST'])
 @token_required
 def create_chat(user_id):
-    conn = connection_pool.getconn()
+    connection = get_db_connection()
     try:
-        cursor = conn.cursor()
+        cursor = connection.cursor()
         generated = str(uuid.uuid4())
         name = request.json.get('name')
         bot_id = request.json.get('bot_id')
         cursor.execute("""INSERT INTO chat VALUES (%s, %s, %s, %s, now(), now()) RETURNING created_at""",
                        (generated, name, user_id, bot_id))
         created_at = cursor.fetchone()
-        conn.commit()
+        connection.commit()
         cursor.execute(
             """SELECT c.chat_name, b.bot_avatar, b.name FROM chat c JOIN bot b ON c.bot_id = b.bot_id WHERE c.bot_id = %s""",
             (bot_id,)
@@ -151,7 +161,7 @@ def create_chat(user_id):
         return response, 200
 
     except Exception as e:
-        conn.rollback()
+        connection.rollback()
         print(str(e))
 
         return jsonify({
@@ -160,15 +170,15 @@ def create_chat(user_id):
         }), 500
 
     finally:
-        connection_pool.putconn(conn)  # Always return the connection to the pool
+        release_db_connection(connection)
 
 
 @chat_blueprint.route('/user', methods=['GET'])
 @token_required
 def fetch_chats(user_id):
-    conn = connection_pool.getconn()  # Get connection from the pool
+    connection = get_db_connection()
     try:
-        cursor = conn.cursor()
+        cursor = connection.cursor()
         cursor.execute("""SELECT c.chat_id, c.chat_name, c.created_at, b.bot_avatar, b.name, b.bot_id FROM """
                        """chat c JOIN bot b on c.bot_id = b.bot_id JOIN "user" u on u.user_id = c.user_id WHERE u.user_id = %s""", (user_id,))
         user_chats = cursor.fetchall()
@@ -188,7 +198,7 @@ def fetch_chats(user_id):
         return response, 200
 
     except Exception as e:
-        conn.rollback()
+        connection.rollback()
         print(str(e))
         return jsonify({
             "error": "An unexpected error occurred",
@@ -196,15 +206,15 @@ def fetch_chats(user_id):
         }), 500
 
     finally:
-        connection_pool.putconn(conn)  # Always return the connection to the pool
+        release_db_connection(connection)
 
 
 @chat_blueprint.route('/<chatId>', methods=['GET'])
 @token_required
 def select_chat(user_id, chatId):
-    conn = connection_pool.getconn()  # Get connection from the pool
+    connection = get_db_connection()
     try:
-        cursor = conn.cursor()
+        cursor = connection.cursor()
         if chatId is None:
             return jsonify({
                 "message": "Chat was not found"
@@ -222,7 +232,7 @@ def select_chat(user_id, chatId):
             WHERE c.user_id = %s AND c.chat_id = %s
         """, (user_id, chatId))
 
-        conn.commit()
+        connection.commit()
         ch = cursor.fetchone()
         data = {
             "chat_id": chatId,
@@ -237,35 +247,35 @@ def select_chat(user_id, chatId):
         return response, 200
 
     except Exception as e:
-        conn.rollback()
+        connection.rollback()
         return jsonify({
             "error": "An unexpected error occurred",
             "details": str(e)
         }), 500
 
     finally:
-        connection_pool.putconn(conn)  # Always return the connection to the pool
+        release_db_connection(connection)
 
 
 @chat_blueprint.route('/<chatId>/delete', methods=['DELETE'])
 @token_required
 def delete_chat(user_id, chatId):
-    conn = connection_pool.getconn()
+    connection = get_db_connection()
     try:
-        cursor = conn.cursor()
+        cursor = connection.cursor()
         cursor.execute("""DELETE FROM chat_message WHERE chat_id = %s RETURNING message_id""", (chatId,))
         messages_id = cursor.fetchall()
         for message_id in messages_id:
             cursor.execute("""DELETE FROM message WHERE message_id = %s""", (message_id, ))
         cursor.execute("""DELETE FROM chat WHERE chat_id = %s""", (chatId,))
-        conn.commit()
+        connection.commit()
         response = jsonify({
             "message": "Chat was deleted",
         })
         return response, 200
 
     except Exception as e:
-        conn.rollback()
+        connection.rollback()
         print(str(e))
         return jsonify({
             "error": "An unexpected error occurred",
@@ -273,4 +283,4 @@ def delete_chat(user_id, chatId):
         }), 500
 
     finally:
-        connection_pool.putconn(conn)
+        release_db_connection(connection)

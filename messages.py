@@ -1,15 +1,24 @@
 from flask import Blueprint, jsonify, request
-from configuration import conn, token_required, connection_pool
+from configuration import token_required, connection_pool
 
 messages_blueprint = Blueprint('messages', __name__)
+
+
+def get_db_connection():
+    return connection_pool.getconn()
+
+
+def release_db_connection(connection):
+    if connection:
+        connection_pool.putconn(connection)
 
 
 @messages_blueprint.route('/fetch', methods=['GET'])
 @token_required
 def get_messages(user_id):
     try:
-        conn = connection_pool.getconn()
-        cursor = conn.cursor()
+        connection = get_db_connection()
+        cursor = connection.cursor()
 
         chat_id = request.headers.get('X-chat-id')
         bot_id = request.headers.get('X-bot-id')
@@ -61,7 +70,7 @@ def get_messages(user_id):
         return response, 200
 
     except Exception as e:
-        conn.rollback()
+        connection.rollback()
         return jsonify({"error": "An unexpected error occurred", "details": str(e)}), 500
     finally:
-        connection_pool.putconn(conn)
+        release_db_connection(connection)

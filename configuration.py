@@ -2,7 +2,6 @@ import jwt
 from psycopg2 import pool
 import logging
 import os
-import sys
 import datetime
 from flask import request, jsonify
 from functools import wraps
@@ -44,7 +43,7 @@ connection_pool = pool.SimpleConnectionPool(
     database=dbname
 )
 
-conn = connection_pool.getconn()
+
 
 def ask_gpt(text, temperature, top_p, max_tokens):
     try:
@@ -58,7 +57,7 @@ def ask_gpt(text, temperature, top_p, max_tokens):
             max_tokens=max_tokens
         )
         response = completion.choices[0].message.content
-        return response, 200;
+        return response, 200
     except Exception as e:
         return str(e), 500
 

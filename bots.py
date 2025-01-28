@@ -6,13 +6,21 @@ from configuration import connection_pool
 bots_blueprint = Blueprint('bots', __name__)
 
 
+def get_db_connection():
+    return connection_pool.getconn()
+
+
+def release_db_connection(connection):
+    if connection:
+        connection_pool.putconn(connection)
+
+
 @bots_blueprint.route('/create', methods=['POST'])
 @token_required
 def create_bot():
-
     try:
-        conn = connection_pool.getconn()
-        cursor = conn.cursor()
+        connection = get_db_connection()
+        cursor = connection.cursor()
         generated = str(uuid.uuid4())
         name = request.json.get('name')
         model = request.json.get('model')
@@ -20,7 +28,7 @@ def create_bot():
         description = request.json.get('description')
         cursor.execute("INSERT INTO bot VALUES (%s, %s, %s, %s, %s, now(), now())",
          (generated, name, model, avatar, description))
-        conn.commit()
+        connection.commit()
 
         response = jsonify({
             "bot_id": generated,
@@ -28,26 +36,25 @@ def create_bot():
             "model": model,
             "bot_avatar": avatar
         })
-        connection_pool.putconn(conn)
         return response, 200
 
     except Exception as e:
-        conn.rollback()
+        connection.rollback()
         return jsonify({
             "error": "An unexpected error occurred",
             "details": str(e)
         }), 500
 
     finally:
-        connection_pool.putconn(conn)
+        release_db_connection(connection)
 
 
 @bots_blueprint.route('/bots', methods=['GET'])
 @token_required
 def get_bots(user_id):
     try:
-        conn = connection_pool.getconn()
-        cursor = conn.cursor()
+        connection = get_db_connection()
+        cursor = connection.cursor()
         cursor.execute("""
             SELECT bot_id, name, model, bot_avatar, description, created_at, updated_at FROM bot
         """)
@@ -72,11 +79,11 @@ def get_bots(user_id):
         return response, 200
 
     except Exception as e:
-        conn.rollback()
+        connection.rollback()
         return jsonify({
             "error": "An unexpected error occurred",
             "details": str(e)
         }), 500
 
     finally:
-        connection_pool.putconn(conn)
+        release_db_connection(connection)
