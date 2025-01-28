@@ -46,7 +46,7 @@ def handle_preflight():
         response = jsonify({"message": "Preflight request success"})
         response.headers.add('Access-Control-Allow-Origin', request.headers.get('Origin'))
         response.headers.add('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE')
-        response.headers.add('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+        response.headers.add('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-bot-id, x-chat-id, x-name', 'X-name', 'X-chat-id', 'X-bot-id')
         response.headers.add('Access-Control-Allow-Credentials', 'true')
         return response, 200
 
