@@ -17,7 +17,7 @@ def release_db_connection(connection):
 
 @bots_blueprint.route('/create', methods=['POST', 'OPTIONS'])
 @token_required
-@options_endpoint
+# @options_endpoint
 def create_bot():
     try:
         connection = get_db_connection()
@@ -52,7 +52,7 @@ def create_bot():
 
 @bots_blueprint.route('/bots', methods=['GET', 'OPTIONS'])
 @token_required
-@options_endpoint
+# @options_endpoint
 def get_bots(user_id):
     try:
         connection = get_db_connection()

@@ -15,7 +15,7 @@ def release_db_connection(connection):
 
 @messages_blueprint.route('/fetch', methods=['GET', 'OPTIONS'])
 @token_required
-@options_endpoint
+# @options_endpoint
 def get_messages(user_id):
     try:
         connection = get_db_connection()

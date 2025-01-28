@@ -41,7 +41,7 @@ def choose_model(name, text):
 
 @chat_blueprint.route('/ask', methods=['POST', 'OPTIONS'])
 @token_required
-@options_endpoint
+# @options_endpoint
 def ask_model(user_id):
     connection = get_db_connection()
     try:
@@ -136,7 +136,7 @@ def ask_model(user_id):
 
 @chat_blueprint.route('/create', methods=['POST', 'OPTIONS'])
 @token_required
-@options_endpoint
+# @options_endpoint
 def create_chat(user_id):
     connection = get_db_connection()
     try:
@@ -177,7 +177,7 @@ def create_chat(user_id):
 
 @chat_blueprint.route('/user', methods=['GET', 'OPTIONS'])
 @token_required
-@options_endpoint
+# @options_endpoint
 def fetch_chats(user_id):
     connection = get_db_connection()
     try:
@@ -214,7 +214,7 @@ def fetch_chats(user_id):
 
 @chat_blueprint.route('/<chatId>', methods=['GET', 'OPTIONS'])
 @token_required
-@options_endpoint
+# @options_endpoint
 def select_chat(user_id, chatId):
     connection = get_db_connection()
     try:
@@ -263,7 +263,7 @@ def select_chat(user_id, chatId):
 
 @chat_blueprint.route('/<chatId>/delete', methods=['DELETE', 'OPTIONS'])
 @token_required
-@options_endpoint
+# @options_endpoint
 def delete_chat(user_id, chatId):
     connection = get_db_connection()
     try:
