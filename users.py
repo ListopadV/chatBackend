@@ -89,6 +89,9 @@ def login():
             "details": str(e)
         }), 500
 
+    finally:
+        connection_pool.putconn(conn)
+
 
 @users_blueprint.route('/fetch', methods=['GET'])
 def fetch():
@@ -126,6 +129,9 @@ def fetch():
             "error": "An unexpected error occurred",
             "details": str(e)
         }), 500
+
+    finally:
+        connection_pool.putconn(conn)
 
 
 @users_blueprint.route('/callback', methods=['POST'])
