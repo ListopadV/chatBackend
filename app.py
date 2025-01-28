@@ -10,8 +10,6 @@ import os
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
 
-CORS(app, origins=['https://chat-frontend-vlo.vercel.app', 'http://localhost:3000'])
-
 app.register_blueprint(users_blueprint, url_prefix='/users')
 app.register_blueprint(chat_blueprint, url_prefix='/chats')
 app.register_blueprint(messages_blueprint, url_prefix='/messages')
@@ -32,6 +30,8 @@ def handle_db_integrity_error(error):
 def handle_generic_error(error):
     return jsonify({"error": "An unexpected error occurred", "details": str(error)}), 500
 
+
+CORS(app, origins=['https://chat-frontend-vlo.vercel.app', 'http://localhost:3000'])
 
 if __name__ == "__main__":
     app.run(debug=True, host='0.0.0.0', port=8000)
