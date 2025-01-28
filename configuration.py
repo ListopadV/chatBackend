@@ -123,3 +123,17 @@ def token_required(f):
         user_id = decode_jwt_token(auth_render)
         return f(user_id, *args, **kwargs)
     return decorated
+
+
+def options_endpoint(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if request.method == 'OPTIONS':
+            response = jsonify()
+            response.headers.add('Access-Control-Allow-Origin', 'https://chat-frontend-vlo.vercel.app')
+            response.headers.add('Access-Control-Allow-Headers', 'Content-Type, x-bot-id, x-chat-id, x-name')
+            response.headers.add('Access-Control-Allow-Methods', 'GET, OPTIONS')
+            response.headers.add('Access-Control-Allow-Credentials', 'true')
+            return response, 200
+        return f(*args, **kwargs)
+    return decorated

@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request
-from configuration import  token_required, ask_bard, ask_gpt, connection_pool
+from configuration import  token_required, ask_bard, ask_gpt, connection_pool, options_endpoint
 import uuid
 
 chat_blueprint = Blueprint('chats', __name__)
@@ -39,8 +39,9 @@ def choose_model(name, text):
         return "Invalid model name", 400
 
 
-@chat_blueprint.route('/ask', methods=['POST'])
+@chat_blueprint.route('/ask', methods=['POST', 'OPTIONS'])
 @token_required
+@options_endpoint
 def ask_model(user_id):
     connection = get_db_connection()
     try:
@@ -133,8 +134,9 @@ def ask_model(user_id):
         release_db_connection(connection)
 
 
-@chat_blueprint.route('/create', methods=['POST'])
+@chat_blueprint.route('/create', methods=['POST', 'OPTIONS'])
 @token_required
+@options_endpoint
 def create_chat(user_id):
     connection = get_db_connection()
     try:
@@ -173,8 +175,9 @@ def create_chat(user_id):
         release_db_connection(connection)
 
 
-@chat_blueprint.route('/user', methods=['GET'])
+@chat_blueprint.route('/user', methods=['GET', 'OPTIONS'])
 @token_required
+@options_endpoint
 def fetch_chats(user_id):
     connection = get_db_connection()
     try:
@@ -209,8 +212,9 @@ def fetch_chats(user_id):
         release_db_connection(connection)
 
 
-@chat_blueprint.route('/<chatId>', methods=['GET'])
+@chat_blueprint.route('/<chatId>', methods=['GET', 'OPTIONS'])
 @token_required
+@options_endpoint
 def select_chat(user_id, chatId):
     connection = get_db_connection()
     try:
@@ -257,8 +261,9 @@ def select_chat(user_id, chatId):
         release_db_connection(connection)
 
 
-@chat_blueprint.route('/<chatId>/delete', methods=['DELETE'])
+@chat_blueprint.route('/<chatId>/delete', methods=['DELETE', 'OPTIONS'])
 @token_required
+@options_endpoint
 def delete_chat(user_id, chatId):
     connection = get_db_connection()
     try:

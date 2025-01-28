@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request
-from configuration import token_required, connection_pool
+from configuration import token_required, connection_pool, options_endpoint
 
 messages_blueprint = Blueprint('messages', __name__)
 
@@ -13,8 +13,9 @@ def release_db_connection(connection):
         connection_pool.putconn(connection)
 
 
-@messages_blueprint.route('/fetch', methods=['GET'])
+@messages_blueprint.route('/fetch', methods=['GET', 'OPTIONS'])
 @token_required
+@options_endpoint
 def get_messages(user_id):
     try:
         connection = get_db_connection()

@@ -1,4 +1,4 @@
-from configuration import decode_jwt_token, token_required
+from configuration import decode_jwt_token, token_required, options_endpoint
 from flask import Blueprint, request, jsonify
 import uuid
 from configuration import connection_pool
@@ -15,8 +15,9 @@ def release_db_connection(connection):
         connection_pool.putconn(connection)
 
 
-@bots_blueprint.route('/create', methods=['POST'])
+@bots_blueprint.route('/create', methods=['POST', 'OPTIONS'])
 @token_required
+@options_endpoint
 def create_bot():
     try:
         connection = get_db_connection()
@@ -49,8 +50,9 @@ def create_bot():
         release_db_connection(connection)
 
 
-@bots_blueprint.route('/bots', methods=['GET'])
+@bots_blueprint.route('/bots', methods=['GET', 'OPTIONS'])
 @token_required
+@options_endpoint
 def get_bots(user_id):
     try:
         connection = get_db_connection()
