@@ -33,7 +33,9 @@ def handle_generic_error(error):
 
 CORS(app, supports_credentials=True, resources={
     r"/*": {
-        "origins": ["https://chat-frontend-vlo.vercel.app", "http://localhost:3000", "http://localhost:8000"]
+        "origins": ["https://chat-frontend-vlo.vercel.app", "http://localhost:3000", "http://localhost:8000"],
+        "methods": ["GET", "POST", "PUT", "DELETE"],
+        "allow_headers": ["Content-Type", "x-bot-id", "x-chat-id", "x-name"]
     }
 })
 
