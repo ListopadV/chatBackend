@@ -57,7 +57,7 @@ def registration():
 @users_blueprint.route('/login', methods=['POST'])
 def login():
     try:
-        connection = get_db_connection()  # Get a connection from the pool
+        connection = get_db_connection()
         cursor = connection.cursor()
         data = request.json
         email = data.get('email')
@@ -85,7 +85,7 @@ def login():
         }), 500
 
     finally:
-        connection_pool.putconn(connection)
+        release_db_connection(connection)
 
 
 @users_blueprint.route('/fetch', methods=['GET'])
@@ -121,7 +121,7 @@ def fetch():
         }), 500
 
     finally:
-        connection_pool.putconn(connection)
+        release_db_connection(connection)
 
 
 @users_blueprint.route('/callback', methods=['POST'])
