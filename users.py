@@ -16,20 +16,6 @@ def release_db_connection(connection):
         connection_pool.putconn(connection)
 
 
-def execute_query(query, params=None, fetch_one=False, fetch_all=False):
-
-    connection = None
-    cursor = None
-
-
-
-    cursor.execute(query, params or ())
-    if fetch_one:
-        result = cursor.fetchone()
-    elif fetch_all:
-        result = cursor.fetchall()
-
-
 @users_blueprint.route('/registration', methods=['POST'])
 def registration():
     try:

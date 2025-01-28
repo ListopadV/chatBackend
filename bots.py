@@ -5,6 +5,7 @@ from configuration import connection_pool
 
 bots_blueprint = Blueprint('bots', __name__)
 
+
 @bots_blueprint.route('/create', methods=['POST'])
 @token_required
 def create_bot():
