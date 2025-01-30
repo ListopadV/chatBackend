@@ -39,7 +39,7 @@ def choose_model(name, text):
         return "Invalid model name", 400
 
 
-@chat_blueprint.route('/ask', methods=['POST', 'OPTIONS'])
+@chat_blueprint.route('/ask', methods=['POST'])
 @token_required
 # @options_endpoint
 def ask_model(user_id):
@@ -134,7 +134,7 @@ def ask_model(user_id):
         release_db_connection(connection)
 
 
-@chat_blueprint.route('/create', methods=['POST', 'OPTIONS'])
+@chat_blueprint.route('/create', methods=['POST'])
 @token_required
 # @options_endpoint
 def create_chat(user_id):
@@ -175,7 +175,7 @@ def create_chat(user_id):
         release_db_connection(connection)
 
 
-@chat_blueprint.route('/user', methods=['GET', 'OPTIONS'])
+@chat_blueprint.route('/user', methods=['GET'])
 @token_required
 # @options_endpoint
 def fetch_chats(user_id):
@@ -212,7 +212,7 @@ def fetch_chats(user_id):
         release_db_connection(connection)
 
 
-@chat_blueprint.route('/<chatId>', methods=['GET', 'OPTIONS'])
+@chat_blueprint.route('/<chatId>', methods=['GET'])
 @token_required
 # @options_endpoint
 def select_chat(user_id, chatId):
@@ -261,7 +261,7 @@ def select_chat(user_id, chatId):
         release_db_connection(connection)
 
 
-@chat_blueprint.route('/<chatId>/delete', methods=['DELETE', 'OPTIONS'])
+@chat_blueprint.route('/<chatId>/delete', methods=['DELETE'])
 @token_required
 # @options_endpoint
 def delete_chat(user_id, chatId):

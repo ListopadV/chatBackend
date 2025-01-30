@@ -30,25 +30,26 @@ def handle_db_integrity_error(error):
 def handle_generic_error(error):
     return jsonify({"error": "An unexpected error occurred", "details": str(error)}), 500
 
+#
+# CORS(app, supports_credentials=True, resources={
+#     r"/*": {
+#         "origins": ["https://chat-frontend-vlo.vercel.app", "http://localhost:3000", "http://localhost:8000"],
+#         "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+#         "allow_headers": ["Content-Type", "x-bot-id", "x-chat-id", "x-name", "X-bot-id", "X-chat-id", "X-name"]
+#     }
+# })
+CORS(app, origins=['https://chat-frontend-vlo.vercel.app'])
 
-CORS(app, supports_credentials=True, resources={
-    r"/*": {
-        "origins": ["https://chat-frontend-vlo.vercel.app", "http://localhost:3000", "http://localhost:8000"],
-        "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-        "allow_headers": ["Content-Type", "x-bot-id", "x-chat-id", "x-name", "X-bot-id", "X-chat-id", "X-name"]
-    }
-})
 
-
-@app.before_request
-def handle_preflight():
-    if request.method == 'OPTIONS':
-        response = jsonify({"message": "Preflight request success"})
-        response.headers.add('Access-Control-Allow-Origin', 'https://chat-frontend-vlo.vercel.app')
-        response.headers.add('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE')
-        response.headers.add('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-bot-id, x-chat-id, x-name', 'X-name', 'X-chat-id', 'X-bot-id')
-        response.headers.add('Access-Control-Allow-Credentials', 'true')
-        return response, 200
+# @app.before_request
+# def handle_preflight():
+#     if request.method == 'OPTIONS':
+#         response = jsonify({"message": "Preflight request success"})
+#         response.headers.add('Access-Control-Allow-Origin', 'https://chat-frontend-vlo.vercel.app')
+#         response.headers.add('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE')
+#         response.headers.add('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-bot-id, x-chat-id, x-name', 'X-name', 'X-chat-id', 'X-bot-id')
+#         response.headers.add('Access-Control-Allow-Credentials', 'true')
+#         return response, 200
 
 
 if __name__ == "__main__":
