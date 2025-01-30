@@ -17,8 +17,6 @@ def release_db_connection(connection):
 @token_required
 # @options_endpoint
 def get_messages(user_id):
-    if request.method == "OPTIONS":
-        return jsonify({"message": "CORS preflight passed"}), 200
     try:
         connection = get_db_connection()
         cursor = connection.cursor()

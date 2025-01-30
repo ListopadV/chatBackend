@@ -40,15 +40,15 @@ CORS(app, supports_credentials=True, resources={
 })
 
 
-# @app.before_request
-# def handle_preflight():
-#     if request.method == 'OPTIONS':
-#         response = jsonify({"message": "Preflight request success"})
-#         response.headers.add('Access-Control-Allow-Origin', request.headers.get('Origin'))
-#         response.headers.add('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE')
-#         response.headers.add('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-bot-id, x-chat-id, x-name', 'X-name', 'X-chat-id', 'X-bot-id')
-#         response.headers.add('Access-Control-Allow-Credentials', 'true')
-#         return response, 200
+@app.before_request
+def handle_preflight():
+    if request.method == 'OPTIONS':
+        response = jsonify({"message": "Preflight request success"})
+        response.headers.add('Access-Control-Allow-Origin', 'https://chat-frontend-vlo.vercel.app')
+        response.headers.add('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE')
+        response.headers.add('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-bot-id, x-chat-id, x-name', 'X-name', 'X-chat-id', 'X-bot-id')
+        response.headers.add('Access-Control-Allow-Credentials', 'true')
+        return response, 200
 
 
 if __name__ == "__main__":

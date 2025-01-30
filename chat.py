@@ -43,8 +43,6 @@ def choose_model(name, text):
 @token_required
 # @options_endpoint
 def ask_model(user_id):
-    if request.method == "OPTIONS":
-        return jsonify({"message": "CORS preflight passed"}), 200
     connection = get_db_connection()
     try:
         cursor = connection.cursor()
@@ -140,8 +138,6 @@ def ask_model(user_id):
 @token_required
 # @options_endpoint
 def create_chat(user_id):
-    if request.method == "OPTIONS":
-        return jsonify({"message": "CORS preflight passed"}), 200
     connection = get_db_connection()
     try:
         cursor = connection.cursor()
@@ -183,8 +179,6 @@ def create_chat(user_id):
 @token_required
 # @options_endpoint
 def fetch_chats(user_id):
-    if request.method == "OPTIONS":
-        return jsonify({"message": "CORS preflight passed"}), 200
     connection = get_db_connection()
     try:
         cursor = connection.cursor()
@@ -222,8 +216,6 @@ def fetch_chats(user_id):
 @token_required
 # @options_endpoint
 def select_chat(user_id, chatId):
-    if request.method == "OPTIONS":
-        return jsonify({"message": "CORS preflight passed"}), 200
     connection = get_db_connection()
     try:
         cursor = connection.cursor()
@@ -273,8 +265,6 @@ def select_chat(user_id, chatId):
 @token_required
 # @options_endpoint
 def delete_chat(user_id, chatId):
-    if request.method == "OPTIONS":
-        return jsonify({"message": "CORS preflight passed"}), 200
     connection = get_db_connection()
     try:
         cursor = connection.cursor()
