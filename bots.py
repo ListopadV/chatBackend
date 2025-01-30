@@ -15,10 +15,12 @@ def release_db_connection(connection):
         connection_pool.putconn(connection)
 
 
-@bots_blueprint.route('/create', methods=['POST'])
+@bots_blueprint.route('/create', methods=['POST', 'OPTIONS'])
 @token_required
 # @options_endpoint
 def create_bot():
+    if request.method == "OPTIONS":
+        return jsonify({"message": "CORS preflight passed"}), 200
     try:
         connection = get_db_connection()
         cursor = connection.cursor()
@@ -50,10 +52,12 @@ def create_bot():
         release_db_connection(connection)
 
 
-@bots_blueprint.route('/bots', methods=['GET'])
+@bots_blueprint.route('/bots', methods=['GET', 'OPTIONS'])
 @token_required
 # @options_endpoint
 def get_bots(user_id):
+    if request.method == "OPTIONS":
+        return jsonify({"message": "CORS preflight passed"}), 200
     try:
         connection = get_db_connection()
         cursor = connection.cursor()

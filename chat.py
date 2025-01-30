@@ -39,10 +39,12 @@ def choose_model(name, text):
         return "Invalid model name", 400
 
 
-@chat_blueprint.route('/ask', methods=['POST'])
+@chat_blueprint.route('/ask', methods=['POST', 'OPTIONS'])
 @token_required
 # @options_endpoint
 def ask_model(user_id):
+    if request.method == "OPTIONS":
+        return jsonify({"message": "CORS preflight passed"}), 200
     connection = get_db_connection()
     try:
         cursor = connection.cursor()
@@ -134,10 +136,12 @@ def ask_model(user_id):
         release_db_connection(connection)
 
 
-@chat_blueprint.route('/create', methods=['POST'])
+@chat_blueprint.route('/create', methods=['POST', 'OPTIONS'])
 @token_required
 # @options_endpoint
 def create_chat(user_id):
+    if request.method == "OPTIONS":
+        return jsonify({"message": "CORS preflight passed"}), 200
     connection = get_db_connection()
     try:
         cursor = connection.cursor()
@@ -175,10 +179,12 @@ def create_chat(user_id):
         release_db_connection(connection)
 
 
-@chat_blueprint.route('/user', methods=['GET'])
+@chat_blueprint.route('/user', methods=['GET', 'OPTIONS'])
 @token_required
 # @options_endpoint
 def fetch_chats(user_id):
+    if request.method == "OPTIONS":
+        return jsonify({"message": "CORS preflight passed"}), 200
     connection = get_db_connection()
     try:
         cursor = connection.cursor()
@@ -212,10 +218,12 @@ def fetch_chats(user_id):
         release_db_connection(connection)
 
 
-@chat_blueprint.route('/<chatId>', methods=['GET'])
+@chat_blueprint.route('/<chatId>', methods=['GET', 'OPTIONS'])
 @token_required
 # @options_endpoint
 def select_chat(user_id, chatId):
+    if request.method == "OPTIONS":
+        return jsonify({"message": "CORS preflight passed"}), 200
     connection = get_db_connection()
     try:
         cursor = connection.cursor()
@@ -261,10 +269,12 @@ def select_chat(user_id, chatId):
         release_db_connection(connection)
 
 
-@chat_blueprint.route('/<chatId>/delete', methods=['DELETE'])
+@chat_blueprint.route('/<chatId>/delete', methods=['DELETE', 'OPTIONS'])
 @token_required
 # @options_endpoint
 def delete_chat(user_id, chatId):
+    if request.method == "OPTIONS":
+        return jsonify({"message": "CORS preflight passed"}), 200
     connection = get_db_connection()
     try:
         cursor = connection.cursor()
