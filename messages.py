@@ -13,7 +13,7 @@ def release_db_connection(connection):
         connection_pool.putconn(connection)
 
 
-@messages_blueprint.route('/fetch', methods=['GET', 'OPTIONS'])
+@messages_blueprint.route('/fetch', methods=['GET'])
 @token_required
 # @options_endpoint
 def get_messages(user_id):
