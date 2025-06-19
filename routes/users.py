@@ -90,7 +90,6 @@ def fetch(user_id):
             return jsonify({"error": "User was not found"}), 404
 
         data = user_schema.dump(user)
-        # Можно убрать ненужные поля, если не нужно возвращать user_avatar
         response = jsonify({
             "first_name": data["first_name"],
             "last_name": data["last_name"],
